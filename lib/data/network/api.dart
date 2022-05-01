@@ -1,4 +1,3 @@
-class API {
-  API._();
-  static const String base = "https://opentdb.com/api.php?amount=10&category=9";
-}
+
+   const String baseUrl = "http://185.214.135.36:8080/ords/ibd/orgn/";
+   

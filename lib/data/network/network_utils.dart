@@ -1,251 +1,169 @@
-// ignore_for_file: avoid_print
-
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:http/http.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:dio/dio.dart';
 import 'package:iba/data/network/api.dart';
+import 'package:iba/data/network/exceptions.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 const noInternetMsg = 'You are not connected to Internet';
-const errorMsg = 'Please try again later.';
 
-/// Variables
-bool accessAllowed = false;
-const String access = 'ACCESS';
-bool isSuccessful(int code) {
-  return code >= 200 && code <= 206;
-}
+class NetworkUtil {
+  Dio? _dioWithToken;
+  Dio? _dioWithoutToken;
 
-Future<Response> getRequest(String? endPoint,
-    {bool bearerToken = false, bool noBaseUrl = false}) async {
-  if (await isNetworkAvailable()) {
-    Map<String, String>? headers;
-    Response response;
-    var accessToken = getStringAsync(access);
+  NetworkUtil() {
+    // if (_dioWithToken == null) {
+    //   BaseOptions options =  BaseOptions(
+    //       baseUrl: baseUrl,
+    //       headers: {
+    //         // "Authorization": 'Bearer ${gettoken()}',
+    //         "Accept": "application/json"
+    //       },
+    //       receiveDataWhenStatusError: true,
+    //       connectTimeout: 15 * 1000, // 15 seconds
+    //       receiveTimeout: 15 * 1000 // 15 seconds
+    //       );
 
-    if (bearerToken) {
-      headers = {
-        HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-        "Authorization": "Bearer $accessToken"
-      };
-    }
-
-    if (!noBaseUrl) {
-      print('URL: ${API.base}$endPoint');
-    } else {
-      print('URL: $endPoint');
-    }
-    //print('Header: $headers');
-
-    if (bearerToken) {
-      response = await get(Uri.parse('${API.base}$endPoint'), headers: headers);
-    } else if (noBaseUrl) {
-      response = await get(Uri.parse('$endPoint'));
-    } else {
-      response = await get(Uri.parse('${API.base}$endPoint'));
-    }
-
-    //print('Response: ${response.statusCode} ${response.body}');
-    return response;
-  } else {
-    throw noInternetMsg;
-  }
-}
-
-postRequest(String endPoint, Map? requestBody,
-    {bool bearerToken = false, bool noBaseUrl = false}) async {
-  if (await isNetworkAvailable()) {
-    Response? response;
-    if (!noBaseUrl) {
-      print('URL: ${API.base}$endPoint');
-    } else {
-      print('URL: $endPoint');
-    }
-    print('body: $requestBody');
-
-    var accessToken = getStringAsync(access);
-
-    var headers = {
-      HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-    };
-
-    if (bearerToken) {
-      var header = {"Authorization": "Bearer $accessToken"};
-      headers.addAll(header);
-    }
-
-    print("Headers: $headers");
-    try {
-      if (!noBaseUrl) {
-        response = await post(Uri.parse('${API.base}$endPoint'),
-            body: requestBody, headers: headers);
-      } else {
-        response = await post(Uri.parse(endPoint),
-            body: requestBody, headers: headers);
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-    //print('Response: ${response.statusCode} ${response.body}');
-    return response;
-  } else {
-    throw noInternetMsg;
-  }
-}
-
-putRequest(String endPoint, Map request, {bool bearerToken = true}) async {
-  if (await isNetworkAvailable()) {
-    late Response response;
-    print('URL: ${API.base}$endPoint');
-    print('Request: $request');
-
-    var accessToken = getStringAsync(access);
-
-    var headers = {
-      HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-    };
-
-    if (bearerToken) {
-      var header = {"Authorization": "Bearer $accessToken"};
-      headers.addAll(header);
-    }
-
-    print("Headers: $headers");
-    try {
-      response = await put(Uri.parse('${API.base}$endPoint'),
-          body: request, headers: headers);
-    } catch (e) {
-      print(e.toString());
-    }
-    print('Response: ${response.statusCode} ${response.body}');
-    return response;
-  } else {
-    throw noInternetMsg;
-  }
-}
-
-//TODO: Multipart Request need to be solved
-
-multiPartRequest(String endPoint, Map body,
-    {File? file, String? filename, bool bearerToken = true}) async {
-  if (await isNetworkAvailable()) {
-    ///MultiPart request
-    var request = MultipartRequest(
-      'PUT',
-      Uri.parse('${API.base}$endPoint'),
-    );
-
-    var accessToken = getStringAsync(access);
-
-    var headers = {
-      HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-    };
-
-    if (bearerToken) {
-      var header = {
-        "Authorization": "Bearer $accessToken",
-        "Content-type": "application/json",
-      };
-
-      headers.addAll(header);
-    }
-
-    if (file != null && filename != null) {
-      request.files.add(
-        MultipartFile(
-          'profile_image',
-          file.readAsBytes().asStream(),
-          file.lengthSync(),
-          filename: filename,
-          contentType: MediaType('image', 'jpeg'),
-        ),
-      );
-    }
-
-    request.headers.addAll(headers);
-    request.fields.addAll(body as Map<String, String>);
-
-    print('Request: $request');
-    StreamedResponse streamedResponse = await request.send();
-    Response response = await Response.fromStream(streamedResponse);
-    print('Response: ${response.statusCode} ${response.body}');
-    return response;
-  } else {
-    throw noInternetMsg;
-  }
-}
-
-patchRequest(String endPoint, Map request,
-    {bool requireToken = false,
-    bool bearerToken = false,
-    bool isDigitToken = false}) {}
-
-deleteRequest(String endPoint, {bool bearerToken = true}) async {
-  if (await isNetworkAvailable()) {
-    var accessToken = getStringAsync(access);
-    print('URL: ${API.base}$endPoint');
-
-    var headers = {
-      HttpHeaders.acceptHeader: 'application/json; charset=utf-8',
-    };
-
-    if (bearerToken) {
-      var header = {"Authorization": "Bearer $accessToken"};
-      headers.addAll(header);
-    }
-
-    print(headers);
-    Response response =
-        await delete(Uri.parse('${API.base}$endPoint'), headers: headers);
-    print('Response: ${response.statusCode} ${response.body}');
-    return response;
-  } else {
-    throw noInternetMsg;
-  }
-}
-
-Future handleResponse(Response response, {bool showToast = true}) async {
-  if (!await isNetworkAvailable()) {
-    throw noInternetMsg;
-  }
-  if (isSuccessful(response.statusCode)) {
-    if (response.body.isNotEmpty) {
-      print(response.statusCode);
-      print(response.body);
-      return jsonDecode(response.body);
-    } else {
-      return response.body;
-    }
-  } else {
-    if (response.body.isJson()) {
-      print("handleResponse (json): ${jsonDecode(response.body)}");
-      if (jsonDecode(response.body)['errors'] != null) {
-        toast(
-          jsonDecode(response.body)['errors']
-              [jsonDecode(response.body)['errors'].keys.first][0],
+    //   _dioWithToken =  Dio(options);
+    // }
+    BaseOptions options = BaseOptions(
+        baseUrl: baseUrl,
+        headers: {"Accept": "application/json"},
+        receiveDataWhenStatusError: true,
+        connectTimeout: 15 * 1000, // 15 seconds
+        receiveTimeout: 15 * 1000 // 15 seconds
         );
-      } else if (showToast) {
-        toast(
-          jsonDecode(response.body)['message'] ??
-              jsonDecode(response.body)['error'],
-        );
-      }
 
-      if (response.statusCode == 401) {
-        await getSharedPref().then((value) => value.clear());
-      }
+    _dioWithoutToken = Dio(options);
+  }
 
-      return response.statusCode;
+  Future getRequest({
+    required String api,
+    Map<String, dynamic> body = const {},
+    bool sendToken = false,
+  }) async {
+    if (await isNetworkAvailable()) {
+      {
+        try {
+          Response response = sendToken
+              ? await _dioWithToken!.get(api, queryParameters: body)
+              : await _dioWithoutToken!.get(api, queryParameters: body);
+          return response.data;
+        } on DioError catch (e) {
+          final errorMessage = DioExceptions.fromDioError(e).toString();
+          print("Network layer: $errorMessage");
+          throw errorMessage;
+        }
+      }
     } else {
+      throw noInternetMsg;
+    }
+  }
+
+  Future postRequest({
+    required String api,
+    Map<String, dynamic> body = const {},
+    bool sendToken = false,
+  }) async {
+    try {
+      Response response = sendToken
+          ? await _dioWithToken!.post(api, data: body)
+          : await _dioWithoutToken!.post(api, data: body);
+      return response.data;
+    } on DioError catch (e) {
+      final errorMessage = DioExceptions.fromDioError(e).toString();
+
+      print("Network layer: $errorMessage");
+      throw errorMessage;
+    }
+  }
+
+  Future postRequestwithMedia({
+    required String api,
+    Map<String, dynamic> body = const {},
+    bool sendToken = false,
+  }) async {
+    if (await isNetworkAvailable()) {
       try {
-        print("handleResponse: ${jsonDecode(response.body)}");
-      } catch (e) {
-        print(response.body);
-        return 500;
+        Response response = sendToken
+            ? await _dioWithToken!.post(api, data: FormData.fromMap(body))
+            : await _dioWithoutToken!.post(api, data: FormData.fromMap(body));
+        return response.data;
+      } on DioError catch (e) {
+        final errorMessage = DioExceptions.fromDioError(e).toString();
+
+        print("Network layer: $errorMessage");
+        throw errorMessage;
       }
-      return response.statusCode;
+    } else {
+      throw noInternetMsg;
+    }
+  }
+
+  Future deleteRequest({
+    required String api,
+    bool sendToken = false,
+  }) async {
+    if (await isNetworkAvailable()) {
+      try {
+        Response response = sendToken
+            ? await _dioWithToken!.delete(
+                api,
+              )
+            : await _dioWithoutToken!.delete(
+                api,
+              );
+        return response.data;
+      } on DioError catch (e) {
+        final errorMessage = DioExceptions.fromDioError(e).toString();
+
+        print("Network layer: $errorMessage");
+        throw errorMessage;
+      }
+    } else {
+      throw noInternetMsg;
+    }
+  }
+
+  Future putRequest({
+    required String api,
+    Map<String, dynamic> body = const {},
+    bool sendToken = false,
+  }) async {
+    if (await isNetworkAvailable()) {
+      try {
+        Response response = sendToken
+            ? await _dioWithToken!.put(api, data: body)
+            : await _dioWithoutToken!.put(api, data: body);
+        return response.data;
+      } on DioError catch (e) {
+        final errorMessage = DioExceptions.fromDioError(e).toString();
+
+        print("Network layer: $errorMessage");
+        throw errorMessage;
+      }
+    } else {
+      throw noInternetMsg;
+    }
+  }
+
+  Future putRequestwithMedia({
+    required String api,
+    Map<String, dynamic> body = const {},
+    bool sendToken = false,
+  }) async {
+    if (await isNetworkAvailable()) {
+      try {
+        Response response = sendToken
+            ? await _dioWithToken!.put(api, data: FormData.fromMap(body))
+            : await _dioWithoutToken!.put(api, data: FormData.fromMap(body));
+        return response.data;
+      } on DioError catch (e) {
+        final errorMessage = DioExceptions.fromDioError(e).toString();
+
+        print("Network layer: $errorMessage");
+        throw errorMessage;
+      }
+    } else {
+      throw noInternetMsg;
     }
   }
 }

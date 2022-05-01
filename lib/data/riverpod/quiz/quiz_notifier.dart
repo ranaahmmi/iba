@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/interfaces/iquiz_repository.dart';
-import 'package:iba/data/network/network_exception.dart';
 import 'package:iba/data/riverpod/quiz/quiz_state.dart';
 
 class QuizNotifier extends StateNotifier<QuizState> {
@@ -20,3 +19,5 @@ class QuizNotifier extends StateNotifier<QuizState> {
     }
   }
 }
+
+class NetworkException {}
