@@ -157,6 +157,6 @@ class _DrawerButtonState extends State<DrawerButton>
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 22),
           child: widget.child,
-        ));
+        )).onTap(widget.onTap);
   }
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:iba/data/models/user_model.dart';
 import 'package:iba/helper/app_buttons.dart';
 import 'package:iba/helper/constants.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/custmors_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -93,11 +95,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   defaultpadding,
                   'Dashboard'.text.black.bold.size(20).make(),
                   defaultpadding,
-                  const DashboardCard(
-                    title: 'Customers',
-                    subTitle: 'view list of Customers',
-                    icon: Icons.person,
-                  )
+                  Center(
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 20,
+                      runSpacing: 20,
+                      runAlignment: WrapAlignment.center,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        DashboardCard(
+                          title: 'Customers',
+                          subTitle: 'view list of Customers',
+                          iconColor: AppColors.primaryColor,
+                          icon: Icons.person,
+                          onTab: () {
+                            Navigator.push(context,
+                                SlideRightRoute(page: const CustmorsScreen()));
+                          },
+                        ),
+                        DashboardCard(
+                          title: 'Items',
+                          subTitle: 'view list of Items',
+                          iconColor: Colors.green,
+                          icon: Icons.shopping_bag_outlined,
+                          onTab: () {},
+                        ),
+                        DashboardCard(
+                          title: 'Orders',
+                          iconColor: Colors.orange,
+                          subTitle: 'view list of Orders',
+                          icon: Icons.shopping_cart_outlined,
+                          onTab: () {},
+                        ),
+                        DashboardCard(
+                          title: 'Target Reports',
+                          iconColor: Colors.orange[900]!,
+                          subTitle: 'view list of Reports',
+                          icon: Icons.bar_chart_rounded,
+                          onTab: () {},
+                        ),
+                        DashboardCard(
+                          title: 'Daily Sales',
+                          iconColor: Colors.green,
+                          subTitle: 'view list of Reorts',
+                          icon: Icons.receipt_outlined,
+                          onTab: () {},
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ).px(25)
             ],
@@ -111,27 +157,30 @@ class _HomeScreenState extends State<HomeScreen> {
 class DashboardCard extends StatelessWidget {
   final String title, subTitle;
   final IconData icon;
-
+  final Function? onTab;
+  final Color iconColor;
   const DashboardCard({
     Key? key,
     required this.title,
     required this.subTitle,
     required this.icon,
+    required this.iconColor,
+    this.onTab,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return DrawerButton(
-      width: 146,
-      height: 180,
-      onTap: () {},
+      width: 160,
+      height: 190,
+      onTap: onTab,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             icon,
             size: 23,
-            color: AppColors.primaryColor,
+            color: iconColor,
           ).p(10).box.roundedFull.color(AppColors.grey.withOpacity(0.2)).make(),
           defaultpadding,
           subTitle.text.color(AppColors.grey).size(10).make(),

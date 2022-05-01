@@ -51,10 +51,11 @@ class Constatnts {
     return Center(child: 'Error: $e'.text.center.red600.makeCentered());
   }
 
-  InputDecoration appInputDucoration(String hint, Color color) {
+  InputDecoration appInputDucoration(String hint, Color color, {IconData? icon}) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: AppColors.grey),
+      prefixIcon: icon != null ? Icon(icon) : null,
       filled: true,
       fillColor: Colors.white,
       errorStyle: const TextStyle(fontSize: 10, height: 0.5),
