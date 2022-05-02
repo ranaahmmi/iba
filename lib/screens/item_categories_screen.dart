@@ -1,24 +1,25 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:iba/data/riverpod/custmors/custmors_notifier_provider.dart';
-import 'package:iba/data/riverpod/custmors/custmors_state.dart';
+import 'package:iba/data/models/item_model.dart';
+import 'package:iba/data/riverpod/item/item_categories_notifier_provider.dart';
 import 'package:iba/helper/constants.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
-import 'package:iba/screens/customrs_profile.dart';
+import 'package:iba/screens/item_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-class CustmorsScreen extends ConsumerStatefulWidget {
-  final int placeID;
-  const CustmorsScreen({Key? key, required this.placeID}) : super(key: key);
+class ItemCategoriesScreen extends ConsumerStatefulWidget {
+  const ItemCategoriesScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _CustmorsScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ItemCategoriesScreenState();
 }
 
-class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
+class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   final TextEditingController _searchController = TextEditingController();
@@ -26,7 +27,7 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      ref.read(custmorsNotifierProvider.notifier).getCustmors(widget.placeID);
+      ref.read(itemCategoryNotifierProvider.notifier).getItemCategory();
     });
     super.initState();
   }
@@ -40,7 +41,7 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final custmorsState = ref.watch(custmorsNotifierProvider);
+    final itemCategoryState = ref.watch(itemCategoryNotifierProvider);
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -65,7 +66,12 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    child: 'Customers'.text.bold.size(14).black.makeCentered(),
+                    child: 'Item Categories'
+                        .text
+                        .bold
+                        .size(14)
+                        .black
+                        .makeCentered(),
                   ),
                 ],
               ),
@@ -73,11 +79,11 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
             AppTextField(
               textFieldType: TextFieldType.NAME,
               decoration: Constatnts().appInputDucoration(
-                  'Search Name', AppColors.primaryColor,
+                  'Search Categories', AppColors.primaryColor,
                   icon: Icons.search),
             ).px(10),
             10.heightBox,
-            custmorsState is CustmorsLoadedState
+            itemCategoryState is ItemCategoryLoadedState
                 ? Expanded(
                     child: SmartRefresher(
                       controller: _refreshController,
@@ -85,14 +91,14 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                       enablePullUp: true,
                       onRefresh: () async {
                         await ref
-                            .read(custmorsNotifierProvider.notifier)
-                            .getCustmors(widget.placeID);
+                            .read(itemCategoryNotifierProvider.notifier)
+                            .getItemCategory();
                         _refreshController.loadComplete();
                       },
                       onLoading: () async {
                         final bool result = await ref
-                            .read(custmorsNotifierProvider.notifier)
-                            .getCustmorsLoadMore(widget.placeID);
+                            .read(itemCategoryNotifierProvider.notifier)
+                            .getItemCategoryLoadMore();
 
                         if (result) {
                           _refreshController.loadComplete();
@@ -105,38 +111,28 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                       },
                       child: ListView.builder(
                           shrinkWrap: true,
-                          itemCount: custmorsState.custmorsList!.length,
+                          itemCount: itemCategoryState.itemCategoryList!.length,
                           itemBuilder: (context, index) {
-                            final customor = custmorsState.custmorsList![index];
-                            return CustomerCards(
-                              name: customor.csName ?? '',
-                              location: customor.address ?? '',
-                              phone: customor.phoneNo ?? '',
-                              storeName: customor.csName ?? '',
-                              onTab: () {
-                                Navigator.push(
-                                    context,
-                                    SlideRightRoute(
-                                        page: CustmorsProfile(
-                                            custmor: customor)));
-                              },
-                            );
+                            return ItemCategoryCards(
+                                itemCategory:
+                                    itemCategoryState.itemCategoryList![index]);
                           }),
                     ),
                   )
-                : custmorsState is CustmorsLoadingState
+                : itemCategoryState is ItemCategoryLoadingState
                     ? Loader(
                         size: 40,
                       )
-                    : custmorsState is CustmorsErrorState
+                    : itemCategoryState is ItemCategoryErrorState
                         ? Expanded(
                             child: Column(
                               children: [
-                                Constatnts().error(custmorsState.message),
+                                Constatnts().error(itemCategoryState.message),
                                 IconButton(
                                     onPressed: (() => ref
-                                        .read(custmorsNotifierProvider.notifier)
-                                        .getCustmors(widget.placeID)),
+                                        .read(itemCategoryNotifierProvider
+                                            .notifier)
+                                        .getItemCategory()),
                                     icon: const Icon(Icons.refresh_outlined))
                               ],
                             ),
@@ -149,16 +145,11 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
   }
 }
 
-class CustomerCards extends StatelessWidget {
-  final String name, storeName, location, phone;
-  final void Function() onTab;
-  const CustomerCards({
+class ItemCategoryCards extends StatelessWidget {
+  final ItemCategoryModel itemCategory;
+  const ItemCategoryCards({
     Key? key,
-    required this.name,
-    required this.storeName,
-    required this.location,
-    required this.phone,
-    required this.onTab,
+    required this.itemCategory,
   }) : super(key: key);
 
   @override
@@ -175,38 +166,42 @@ class CustomerCards extends StatelessWidget {
               blurRadius: 20,
             ),
           ]),
-      child: Row(
+      child: Column(
         children: [
-          Icon(
-            Icons.person,
-            size: 23,
-            color: AppColors.grey,
-          ).p(10).box.roundedFull.color(Colors.white).make(),
-          10.widthBox,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                name.text.black.bold.size(14).make(),
-                5.heightBox,
-                storeName.text.color(AppColors.grey).size(10).make(),
-                5.heightBox,
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_pin,
-                      size: 20,
-                    ),
-                    2.widthBox,
-                    Expanded(child: location.text.gray600.size(10).make()),
-                  ],
-                ),
-                5.heightBox,
-              ],
+          SizedBox(
+            height: 100,
+            width: double.infinity,
+            child: CachedNetworkImage(
+              imageUrl:
+                  "https://www.foodnavigator-asia.com/var/wrbm_gb_food_pharma/storage/images/_aliases/news_large/3/1/0/1/171013-1-eng-GB/1.-Moutai.jpg",
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                  Center(
+                      child: CircularProgressIndicator(
+                          value: downloadProgress.progress)),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+              fit: BoxFit.cover,
             ),
           ),
+          Divider(
+            color: AppColors.primaryColor,
+            thickness: 1,
+          ),
+          10.heightBox,
+          '${itemCategory.distributionName}'
+              .text
+              .bold
+              .size(15)
+              .black
+              .makeCentered(),
         ],
-      ).pSymmetric(h: 20, v: 10),
-    ).onTap(onTab);
+      ).pOnly(bottom: 20),
+    ).onTap(() {
+      Navigator.push(
+          context,
+          SlideRightRoute(
+              page: ItemsScreen(
+            categoryID: itemCategory.distributionPk!,
+          )));
+    });
   }
 }
