@@ -27,7 +27,9 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      ref.read(itemCategoryNotifierProvider.notifier).getItemCategory();
+      ref
+          .read(itemCategoryNotifierProvider.notifier)
+          .getItemCategory(_searchController.text);
     });
     super.initState();
   }
@@ -51,14 +53,17 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
               height: 80,
               child: Stack(
                 children: [
-                  const Positioned(
+                  Positioned(
                     top: 0,
                     bottom: 0,
                     left: 0,
-                    child: Icon(
-                      Icons.arrow_back,
-                      size: 30,
-                      color: Colors.black,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 30,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Positioned(
@@ -78,6 +83,12 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
             ).px(16),
             AppTextField(
               textFieldType: TextFieldType.NAME,
+              controller: _searchController,
+              onFieldSubmitted: (value) {
+                ref
+                    .read(itemCategoryNotifierProvider.notifier)
+                    .getItemCategory(value);
+              },
               decoration: Constatnts().appInputDucoration(
                   'Search Categories', AppColors.primaryColor,
                   icon: Icons.search),
@@ -92,13 +103,13 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
                       onRefresh: () async {
                         await ref
                             .read(itemCategoryNotifierProvider.notifier)
-                            .getItemCategory();
+                            .getItemCategory(_searchController.text);
                         _refreshController.loadComplete();
                       },
                       onLoading: () async {
                         final bool result = await ref
                             .read(itemCategoryNotifierProvider.notifier)
-                            .getItemCategoryLoadMore();
+                            .getItemCategoryLoadMore(_searchController.text);
 
                         if (result) {
                           _refreshController.loadComplete();
@@ -109,14 +120,21 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
                           setState(() {});
                         }
                       },
-                      child: ListView.builder(
+                      child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 0.92,
+                                  mainAxisSpacing: 5,
+                                  crossAxisSpacing: 1),
                           shrinkWrap: true,
                           itemCount: itemCategoryState.itemCategoryList!.length,
                           itemBuilder: (context, index) {
                             return ItemCategoryCards(
                                 itemCategory:
                                     itemCategoryState.itemCategoryList![index]);
-                          }),
+                          }).px(10),
                     ),
                   )
                 : itemCategoryState is ItemCategoryLoadingState
@@ -132,12 +150,14 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
                                     onPressed: (() => ref
                                         .read(itemCategoryNotifierProvider
                                             .notifier)
-                                        .getItemCategory()),
+                                        .getItemCategory(
+                                            _searchController.text)),
                                     icon: const Icon(Icons.refresh_outlined))
                               ],
                             ),
                           )
                         : Container(),
+            defaultpadding,
           ],
         ),
       ),
@@ -167,10 +187,10 @@ class ItemCategoryCards extends StatelessWidget {
             ),
           ]),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            height: 100,
-            width: double.infinity,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
             child: CachedNetworkImage(
               imageUrl:
                   "https://www.foodnavigator-asia.com/var/wrbm_gb_food_pharma/storage/images/_aliases/news_large/3/1/0/1/171013-1-eng-GB/1.-Moutai.jpg",
@@ -178,23 +198,34 @@ class ItemCategoryCards extends StatelessWidget {
                   Center(
                       child: CircularProgressIndicator(
                           value: downloadProgress.progress)),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+              errorWidget: (context, url, error) => Image.asset(
+                "assets/images/product-img.jpg",
+                fit: BoxFit.cover,
+              ),
               fit: BoxFit.cover,
-            ),
-          ),
-          Divider(
-            color: AppColors.primaryColor,
-            thickness: 1,
-          ),
-          10.heightBox,
-          '${itemCategory.distributionName}'
-              .text
-              .bold
-              .size(15)
-              .black
-              .makeCentered(),
+            ).h(120),
+          ).p(10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: '${itemCategory.distributionName}'
+                    .text
+                    .bold
+                    .capitalize
+                    .size(15)
+                    .color(AppColors.primaryColor)
+                    .make(),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white,
+                size: 16,
+              ).p(10).box.color(AppColors.primaryColor).roundedFull.make()
+            ],
+          ).p(10),
         ],
-      ).pOnly(bottom: 20),
+      ),
     ).onTap(() {
       Navigator.push(
           context,

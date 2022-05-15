@@ -6,6 +6,7 @@ import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
 import 'package:iba/screens/custmors_screen.dart';
 import 'package:iba/screens/item_categories_screen.dart';
+import 'package:iba/screens/side_drawer.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,10 +17,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: SideDrawer(
+          user: widget.user,
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -27,14 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 100,
               child: Stack(
                 children: [
-                  const Positioned(
+                  Positioned(
                     top: 0,
                     bottom: 0,
                     left: 0,
-                    child: Icon(
-                      Icons.list_sharp,
-                      size: 30,
-                      color: Colors.black,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.list_sharp,
+                        size: 30,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        _scaffoldKey.currentState!.openDrawer();
+                      },
                     ),
                   ),
                   Positioned(
@@ -154,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
+                    defaultpadding,
                   ],
                 ).px(25),
               ),

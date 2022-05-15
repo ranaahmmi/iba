@@ -26,7 +26,9 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      ref.read(custmorsNotifierProvider.notifier).getCustmors(widget.placeID);
+      ref
+          .read(custmorsNotifierProvider.notifier)
+          .getCustmors(widget.placeID, _searchController.text);
     });
     super.initState();
   }
@@ -50,14 +52,17 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
               height: 80,
               child: Stack(
                 children: [
-                  const Positioned(
+                  Positioned(
                     top: 0,
                     bottom: 0,
                     left: 0,
-                    child: Icon(
-                      Icons.arrow_back,
-                      size: 30,
-                      color: Colors.black,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 30,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Positioned(
@@ -72,6 +77,12 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
             ).px(16),
             AppTextField(
               textFieldType: TextFieldType.NAME,
+              controller: _searchController,
+              onFieldSubmitted: (value) {
+                ref
+                    .read(custmorsNotifierProvider.notifier)
+                    .getCustmors(widget.placeID, value);
+              },
               decoration: Constatnts().appInputDucoration(
                   'Search Name', AppColors.primaryColor,
                   icon: Icons.search),
@@ -86,13 +97,15 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                       onRefresh: () async {
                         await ref
                             .read(custmorsNotifierProvider.notifier)
-                            .getCustmors(widget.placeID);
+                            .getCustmors(
+                                widget.placeID, _searchController.text);
                         _refreshController.loadComplete();
                       },
                       onLoading: () async {
                         final bool result = await ref
                             .read(custmorsNotifierProvider.notifier)
-                            .getCustmorsLoadMore(widget.placeID);
+                            .getCustmorsLoadMore(
+                                widget.placeID, _searchController.text);
 
                         if (result) {
                           _refreshController.loadComplete();
@@ -136,7 +149,8 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                                 IconButton(
                                     onPressed: (() => ref
                                         .read(custmorsNotifierProvider.notifier)
-                                        .getCustmors(widget.placeID)),
+                                        .getCustmors(widget.placeID,
+                                            _searchController.text)),
                                     icon: const Icon(Icons.refresh_outlined))
                               ],
                             ),

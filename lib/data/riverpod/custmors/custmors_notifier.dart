@@ -8,11 +8,11 @@ class CustmorsNotifier extends StateNotifier<CustmorsState> {
   CustmorsNotifier(this._custmorsRepository)
       : super(const InitalCustmorsState());
 
-  Future<bool> getCustmors(int placeID) async {
+  Future<bool> getCustmors(int placeID,String search) async {
     try {
       state = const CustmorsLoadingState();
       final custmors =
-          await _custmorsRepository.fatchCustmor(placeID, loadmore: false);
+          await _custmorsRepository.fatchCustmor(placeID,search, loadmore: false);
       state = CustmorsLoadedState(custmors);
       return true;
     } catch (e) {
@@ -21,10 +21,10 @@ class CustmorsNotifier extends StateNotifier<CustmorsState> {
     }
   }
 
-  Future<bool> getCustmorsLoadMore(int placeID) async {
+  Future<bool> getCustmorsLoadMore(int placeID,String search) async {
     try {
       final custmors =
-          await _custmorsRepository.fatchCustmor(placeID, loadmore: true);
+          await _custmorsRepository.fatchCustmor(placeID, search, loadmore: true);
       state = CustmorsLoadedState(custmors);
       return true;
     } catch (e) {

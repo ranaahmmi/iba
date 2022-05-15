@@ -22,11 +22,11 @@ class _CustmorsProfileState extends State<CustmorsProfile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 350,
+                height: 290,
                 child: Stack(
                   children: [
                     Container(
-                      height: 210,
+                      height: 150,
                       color: AppColors.primaryColor,
                     ),
                     Positioned(

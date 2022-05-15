@@ -15,6 +15,7 @@ class AuthRepository {
       if (userList.isNotEmpty) {
         if (isRemember) {
           await setValue('islogin', true);
+          await setValue('user', userList.first.toJson());
         }
         return userList.first;
       } else {

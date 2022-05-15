@@ -4,6 +4,8 @@ import 'package:iba/helper/style.dart';
 import 'package:iba/screens/splash_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initialize();

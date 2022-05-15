@@ -57,6 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Form(
                   key: _formKey,
                   child: SlideInUp(
+                    duration: const Duration(milliseconds: 700),
                     child: Column(
                       children: [
                         40.heightBox,

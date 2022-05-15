@@ -17,11 +17,11 @@ class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
   ItemCategoyNotifier(this._itemCategoryRepository)
       : super(const InitalItemCategoryState());
 
-  Future<bool> getItemCategory() async {
+  Future<bool> getItemCategory(String search) async {
     try {
       state = const ItemCategoryLoadingState();
       final itemCategory =
-          await _itemCategoryRepository.fatchItemCategorys(loadmore: false);
+          await _itemCategoryRepository.fatchItemCategorys(search,loadmore: false);
       state = ItemCategoryLoadedState(itemCategory);
       return true;
     } catch (e) {
@@ -30,10 +30,10 @@ class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
     }
   }
 
-  Future<bool> getItemCategoryLoadMore() async {
+  Future<bool> getItemCategoryLoadMore(String search) async {
     try {
       final _itemCategory =
-          await _itemCategoryRepository.fatchItemCategorys( loadmore: true);
+          await _itemCategoryRepository.fatchItemCategorys(search, loadmore: true);
       state = ItemCategoryLoadedState(_itemCategory);
       return true;
     } catch (e) {

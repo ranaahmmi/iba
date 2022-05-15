@@ -2,22 +2,23 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/item_model.dart';
+import 'package:iba/data/network/api.dart';
 import 'package:iba/data/riverpod/item/item_notifier_provider.dart';
 
 import 'package:iba/helper/constants.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/cart_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class ItemsScreen extends ConsumerStatefulWidget {
   final int categoryID;
-  const ItemsScreen({Key? key, required this.categoryID})
-      : super(key: key);
+  const ItemsScreen({Key? key, required this.categoryID}) : super(key: key);
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _ItemsScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ItemsScreenState();
 }
 
 class _ItemsScreenState extends ConsumerState<ItemsScreen> {
@@ -28,7 +29,9 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      ref.read(itemNotifierProvider.notifier).getItem(widget.categoryID);
+      ref
+          .read(itemNotifierProvider.notifier)
+          .getItem(widget.categoryID, _searchController.text);
     });
     super.initState();
   }
@@ -52,14 +55,17 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
               height: 80,
               child: Stack(
                 children: [
-                  const Positioned(
+                  Positioned(
                     top: 0,
                     bottom: 0,
                     left: 0,
-                    child: Icon(
-                      Icons.arrow_back,
-                      size: 30,
-                      color: Colors.black,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 30,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ),
                   Positioned(
@@ -73,7 +79,13 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
               ),
             ).px(16),
             AppTextField(
+              controller: _searchController,
               textFieldType: TextFieldType.NAME,
+              onFieldSubmitted: (value) {
+                ref
+                    .read(itemNotifierProvider.notifier)
+                    .getItem(widget.categoryID, _searchController.text);
+              },
               decoration: Constatnts().appInputDucoration(
                   'Search Items', AppColors.primaryColor,
                   icon: Icons.search),
@@ -88,13 +100,14 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                       onRefresh: () async {
                         await ref
                             .read(itemNotifierProvider.notifier)
-                            .getItem(widget.categoryID);
+                            .getItem(widget.categoryID, _searchController.text);
                         _refreshController.loadComplete();
                       },
                       onLoading: () async {
                         final bool result = await ref
                             .read(itemNotifierProvider.notifier)
-                            .getItemLoadMore(widget.categoryID);
+                            .getItemLoadMore(
+                                widget.categoryID, _searchController.text);
 
                         if (result) {
                           _refreshController.loadComplete();
@@ -125,7 +138,8 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                                 IconButton(
                                     onPressed: (() => ref
                                         .read(itemNotifierProvider.notifier)
-                                        .getItem(widget.categoryID)),
+                                        .getItem(widget.categoryID,
+                                            _searchController.text)),
                                     icon: const Icon(Icons.refresh_outlined))
                               ],
                             ),
@@ -159,28 +173,47 @@ class ItemCards extends StatelessWidget {
               blurRadius: 20,
             ),
           ]),
-      child: Column(
+      child: Row(
         children: [
-          SizedBox(
-            height: 100,
-            width: double.infinity,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
             child: CachedNetworkImage(
-              imageUrl:
-                  "https://www.foodnavigator-asia.com/var/wrbm_gb_food_pharma/storage/images/_aliases/news_large/3/1/0/1/171013-1-eng-GB/1.-Moutai.jpg",
+              imageUrl: "$baseUrl/itemPic/${item.itemsPk}",
               progressIndicatorBuilder: (context, url, downloadProgress) =>
                   Center(
                       child: CircularProgressIndicator(
                           value: downloadProgress.progress)),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+              errorWidget: (context, url, error) => Image.asset(
+                "assets/images/noImageFound.png",
+                fit: BoxFit.cover,
+              ),
               fit: BoxFit.cover,
             ),
+          ).wh(100, 100).px(10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                '${item.itemName}'.text.bold.size(15).black.makeCentered(),
+                20.heightBox,
+                VxStepper(
+                  actionButtonColor: AppColors.primaryColor,
+                  actionIconColor: Colors.white,
+                  disableInput: true,
+                  inputTextColor: AppColors.primaryColor,
+                )
+              ],
+            ),
           ),
-          Divider(
-            color: AppColors.primaryColor,
-            thickness: 1,
-          ),
-          10.heightBox,
-          '${item.itemName}'.text.bold.size(15).black.makeCentered(),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  SlideRightRoute(page: const CartScreen()),
+                );
+              },
+              child: 'Add'.text.bold.size(14).white.makeCentered()),
         ],
       ).pOnly(bottom: 20),
     ).onTap(() {
