@@ -4,6 +4,7 @@ import 'package:iba/helper/app_buttons.dart';
 import 'package:iba/helper/constants.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/cart_screen.dart';
 import 'package:iba/screens/custmors_screen.dart';
 import 'package:iba/screens/item_categories_screen.dart';
 import 'package:iba/screens/side_drawer.dart';
@@ -146,7 +147,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             iconColor: Colors.orange,
                             subTitle: 'view list of Orders',
                             icon: Icons.shopping_cart_outlined,
-                            onTab: () {},
+                            onTab: () {
+                              Navigator.push(context,
+                                  SlideRightRoute(page: const CartScreen()));
+                            },
                           ),
                           DashboardCard(
                             title: 'Target Reports',

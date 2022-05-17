@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/item_model.dart';
 import 'package:iba/data/network/api.dart';
+import 'package:iba/data/riverpod/cart_item_notifier_provider.dart';
 import 'package:iba/data/riverpod/item/item_notifier_provider.dart';
-
 import 'package:iba/helper/constants.dart';
-import 'package:iba/helper/page_navigation_animation.dart';
+import 'package:iba/helper/header.dart';
 import 'package:iba/helper/style.dart';
-import 'package:iba/screens/cart_screen.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -51,33 +50,9 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 80,
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        size: 30,
-                        color: Colors.black,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: 'Item'.text.bold.size(14).black.makeCentered(),
-                  ),
-                ],
-              ),
-            ).px(16),
+            const HeaderWidget(
+              title: 'Item',
+            ),
             AppTextField(
               controller: _searchController,
               textFieldType: TextFieldType.NAME,
@@ -122,7 +97,43 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                           shrinkWrap: true,
                           itemCount: itemState.itemList!.length,
                           itemBuilder: (context, index) {
-                            return ItemCards(item: itemState.itemList![index]);
+                            return ItemCards(
+                              item: itemState.itemList![index],
+                              buttonWidget: ref
+                                      .watch(cartItemNotifierProvider)
+                                      .any((element) =>
+                                          element.itemsPk ==
+                                          itemState.itemList![index].itemsPk)
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        ref
+                                            .read(cartItemNotifierProvider
+                                                .notifier)
+                                            .removerFromCart(
+                                                itemState.itemList![index]);
+                                      },
+                                    )
+                                  : IconButton(
+                                      icon: const Icon(
+                                        Icons.add_circle,
+                                        color: Colors.green,
+                                      ),
+                                      onPressed: () {
+                                        ref
+                                            .read(cartItemNotifierProvider
+                                                .notifier)
+                                            .addtoCart(
+                                                itemState.itemList![index]);
+                                      },
+                                    ),
+                              onStepperChange: (value) {
+                                itemState.itemList![index].itemQuantity = value;
+                              },
+                            );
                           }),
                     ),
                   )
@@ -154,9 +165,16 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
 
 class ItemCards extends StatelessWidget {
   final ItemModel item;
+  final Widget? buttonWidget;
+  final Function(int)? onStepperChange;
+  final int steppervalue;
+
   const ItemCards({
     Key? key,
     required this.item,
+    this.buttonWidget,
+    this.onStepperChange,
+    this.steppervalue = 1,
   }) : super(key: key);
 
   @override
@@ -200,28 +218,16 @@ class ItemCards extends StatelessWidget {
                 VxStepper(
                   actionButtonColor: AppColors.primaryColor,
                   actionIconColor: Colors.white,
-                  disableInput: true,
                   inputTextColor: AppColors.primaryColor,
+                  onChange: onStepperChange,
+                  defaultValue: steppervalue,
                 )
               ],
             ),
           ),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  SlideRightRoute(page: const CartScreen()),
-                );
-              },
-              child: 'Add'.text.bold.size(14).white.makeCentered()),
+          if (buttonWidget != null) buttonWidget!
         ],
       ).pOnly(bottom: 20),
-    ).onTap(() {
-      // Navigator.push(
-      //     context,
-      //     SlideRightRoute(
-      //         page: CustmorsProfile(
-      //             custmor: itemCategory)));
-    });
+    );
   }
 }

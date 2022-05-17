@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/item_model.dart';
 import 'package:iba/data/riverpod/item/item_categories_notifier_provider.dart';
 import 'package:iba/helper/constants.dart';
+import 'package:iba/helper/header.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
 import 'package:iba/screens/item_screen.dart';
@@ -49,38 +50,9 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 80,
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        size: 30,
-                        color: Colors.black,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: 'Item Categories'
-                        .text
-                        .bold
-                        .size(14)
-                        .black
-                        .makeCentered(),
-                  ),
-                ],
-              ),
-            ).px(16),
+            const HeaderWidget(
+              title: 'Item Categories',
+            ),
             AppTextField(
               textFieldType: TextFieldType.NAME,
               controller: _searchController,
