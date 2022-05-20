@@ -168,6 +168,7 @@ class ItemCards extends StatelessWidget {
   final Widget? buttonWidget;
   final Function(int)? onStepperChange;
   final int steppervalue;
+  final EdgeInsetsGeometry? margin;
 
   const ItemCards({
     Key? key,
@@ -175,12 +176,14 @@ class ItemCards extends StatelessWidget {
     this.buttonWidget,
     this.onStepperChange,
     this.steppervalue = 1,
+    this.margin,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin:
+          margin ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: const Color.fromARGB(255, 249, 252, 255),

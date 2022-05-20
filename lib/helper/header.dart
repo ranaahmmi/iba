@@ -7,8 +7,10 @@ class HeaderWidget extends StatelessWidget {
   const HeaderWidget({
     Key? key,
     required this.title,
+    this.isShowCart = true,
   }) : super(key: key);
   final String title;
+  final bool isShowCart;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -35,20 +37,21 @@ class HeaderWidget extends StatelessWidget {
             right: 0,
             child: title.text.bold.size(14).black.makeCentered(),
           ),
-          Positioned(
-            top: 0,
-            bottom: 0,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(
-                Icons.shopping_cart_outlined,
-                size: 30,
-                color: Colors.black,
+          if (isShowCart)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 0,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.shopping_cart_outlined,
+                  size: 30,
+                  color: Colors.black,
+                ),
+                onPressed: () => Navigator.push(
+                    context, SlideRightRoute(page: const CartScreen())),
               ),
-              onPressed: () => Navigator.push(
-                  context, SlideRightRoute(page: const CartScreen())),
             ),
-          ),
         ],
       ),
     ).px(16);

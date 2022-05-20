@@ -1,10 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/item_model.dart';
+import 'package:iba/data/models/user_model.dart';
 import 'package:iba/data/riverpod/cart_item_notifier_provider.dart';
+import 'package:iba/helper/app_buttons.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/custmors_screen.dart';
+import 'package:iba/screens/item_categories_screen.dart';
 import 'package:iba/screens/item_screen.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:velocity_x/velocity_x.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -12,6 +19,10 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartList = ref.watch(cartItemNotifierProvider);
+    final custmor = ref.watch(cartCustomNotifierProvider);
+    final user = User.fromJson(
+      getJSONAsync('user'),
+    );
     return SafeArea(
       child: Scaffold(
           appBar: PreferredSize(
@@ -43,6 +54,22 @@ class CartScreen extends ConsumerWidget {
                                 fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     ),
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: 20,
+                      child: const Center(
+                              child: Text('Clear All',
+                                  style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16)))
+                          .onTap(() {
+                        ref.read(cartItemNotifierProvider.notifier).clearCart();
+                        ref.read(cartCustomNotifierProvider.notifier).state =
+                            null;
+                      }),
+                    ),
                   ],
                 ),
               ),
@@ -62,45 +89,67 @@ class CartScreen extends ConsumerWidget {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 8, bottom: 5.0, left: 20, right: 20),
-                      child: Row(
-                        children: const <Widget>[
-                          Text(
-                            'Total Price',
+                    custmor == null
+                        ? AppCustomButton(
+                            title: 'Add Customer',
+                            isBoldtitle: true,
+                            onpressed: () {
+                              Navigator.push(
+                                  context,
+                                  SlideRightRoute(
+                                      page: CustmorsScreen(
+                                          isAddCart: true,
+                                          placeID: user.branchId!)));
+                            },
+                          ).p(20)
+                        : Padding(
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 20, top: 5, bottom: 5),
+                            child: Column(
+                              children: [
+                                CartTileList(
+                                  title: 'Custmor:',
+                                  subTitle: custmor.csName!,
+                                ),
+                                10.heightBox,
+                                CartTileList(
+                                  title: 'Adress:',
+                                  subTitle: custmor.address!,
+                                ),
+                                10.heightBox,
+                                Row(children: <Widget>[
+                                  Text("remove custmor:",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .subtitle2!
+                                          .copyWith(
+                                              fontWeight: FontWeight.w500)),
+                                  const Spacer(),
+                                  IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        ref
+                                            .read(cartCustomNotifierProvider
+                                                .notifier)
+                                            .state = null;
+                                      }),
+                                ]),
+                              ],
+                            ),
                           ),
-                          Spacer(),
-                          Text("\$" "price")
-                        ],
-                      ),
+                    const Divider(
+                      thickness: 1,
+                      indent: 20,
+                      endIndent: 20,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 20, right: 20, top: 5, bottom: 5),
-                      child: Row(
-                        children: const <Widget>[
-                          Text(
-                            "Delivery Charge",
-                          ),
-                          Spacer(),
-                          Text("\$" " delivery charge")
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 20, right: 20, top: 5, bottom: 5),
-                      child: Row(
-                        children: const <Widget>[
-                          Text(
-                            "Discount",
-                          ),
-                          Spacer(),
-                          Text('\$' " discount")
-                        ],
-                      ),
-                    ),
+                    10.heightBox,
+                    CartTileList(
+                      title: 'Agent:',
+                      subTitle: user.personName!,
+                    ).pSymmetric(h: 20, v: 5),
                     const Divider(
                       thickness: 1,
                       indent: 20,
@@ -112,7 +161,7 @@ class CartScreen extends ConsumerWidget {
                       child: Row(
                         children: <Widget>[
                           Text(
-                            'Grand Total',
+                            'Total Items',
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1!
@@ -120,7 +169,7 @@ class CartScreen extends ConsumerWidget {
                           ),
                           const Spacer(),
                           Text(
-                            '\$' " total",
+                            '${cartList.length}',
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1!
@@ -129,29 +178,17 @@ class CartScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: Container(
-                        margin: const EdgeInsets.all(20),
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: const Center(
-                          child: Text("CHECKOUT",
-                              style: TextStyle(
-                                color: Colors.white,
-                              )),
-                        ),
-                      ),
-                      onPressed: () {
+                    AppCustomButton(
+                      title: "CHECKOUT",
+                      height: 60,
+                      isBoldtitle: true,
+                      onpressed: () {
                         //   Navigator.push(
                         //       context,
                         //       MaterialPageRoute(
                         //           builder: (context) => GrobagCheckoutMobile()));
                       },
-                    ),
+                    ).p(20),
                   ],
                 )),
     );
@@ -182,8 +219,8 @@ class CartScreen extends ConsumerWidget {
         key: Key(cartList[index].itemsPk!.toString()),
         background: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.grey,
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.red,
           ),
           alignment: AlignmentDirectional.centerEnd,
           child: const Padding(
@@ -197,6 +234,7 @@ class CartScreen extends ConsumerWidget {
         child: ItemCards(
           item: cartList[index],
           steppervalue: cartList[index].itemQuantity,
+          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
           onStepperChange: (value) {
             ref
                 .read(cartItemNotifierProvider.notifier)
@@ -206,7 +244,7 @@ class CartScreen extends ConsumerWidget {
   }
 
   noCartImage(BuildContext context) {
-    return Image.network(
+    return SvgPicture.network(
       'https://smartkit.wrteam.in/smartkit/grobag/emptycart.svg',
     );
   }
@@ -233,28 +271,39 @@ class CartScreen extends ConsumerWidget {
 
   shopNow(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 28.0),
-      child: CupertinoButton(
-        child: Container(
-            width: MediaQuery.of(context).size.width * 0.7,
-            height: 45,
-            alignment: FractionalOffset.center,
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Text('Shop Now',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headline6!.copyWith(
-                    color: Colors.white, fontWeight: FontWeight.normal))),
-        onPressed: () {
-          // Navigator.pushAndRemoveUntil(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (BuildContext context) => GrobagHomeMobile()),
-          //     ModalRoute.withName('/'));
-        },
-      ),
+        padding: const EdgeInsets.only(top: 28.0, left: 20, right: 20),
+        child: AppCustomButton(
+          title: 'Shop Now',
+          width: 250,
+          height: 50,
+          onpressed: () {
+            Navigator.push(
+                context, SlideRightRoute(page: const ItemCategoriesScreen()));
+          },
+        ));
+  }
+}
+
+class CartTileList extends StatelessWidget {
+  final String title, subTitle;
+  const CartTileList({
+    Key? key,
+    required this.title,
+    required this.subTitle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Text(title,
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2!
+                .copyWith(fontWeight: FontWeight.w500)),
+        const Spacer(),
+        Text(subTitle)
+      ],
     );
   }
 }

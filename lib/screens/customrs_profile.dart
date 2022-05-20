@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:iba/data/models/custmor_model.dart';
 import 'package:iba/helper/constants.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
 import 'package:iba/screens/home_screen.dart';
+import 'package:iba/screens/map.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-class CustmorsProfile extends StatefulWidget {
+class CustmorsProfile extends StatelessWidget {
   final CustmorModel custmor;
   const CustmorsProfile({Key? key, required this.custmor}) : super(key: key);
-  @override
-  State<CustmorsProfile> createState() => _CustmorsProfileState();
-}
 
-class _CustmorsProfileState extends State<CustmorsProfile> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -58,13 +56,13 @@ class _CustmorsProfileState extends State<CustmorsProfile> {
                               radius: 60,
                             ),
                             20.heightBox,
-                            widget.custmor.csName!.text
+                            custmor.csName!.text
                                 .color(AppColors.primaryColor)
                                 .bold
                                 .size(16)
                                 .make(),
                             3.heightBox,
-                            widget.custmor.address!.text
+                            custmor.address!.text
                                 .color(AppColors.primaryColor)
                                 .size(10)
                                 .sm
@@ -93,6 +91,21 @@ class _CustmorsProfileState extends State<CustmorsProfile> {
                       onTab: () {},
                     ),
                     DashboardCard(
+                      title: 'Update Location',
+                      iconColor: Colors.green,
+                      subTitle: 'update lat-long',
+                      icon: Icons.location_on_outlined,
+                      onTab: () {
+                        Navigator.push(
+                            context,
+                            SlideRightRoute(
+                                page: MapPicker(
+                              lat: custmor.latitude ?? 31.5204,
+                              lng: custmor.longitude ?? 74.3587,
+                            )));
+                      },
+                    ),
+                    DashboardCard(
                       title: 'Invoice History',
                       subTitle: 'view history',
                       iconColor: Colors.orange,
@@ -104,13 +117,6 @@ class _CustmorsProfileState extends State<CustmorsProfile> {
                       iconColor: Colors.orange[900]!,
                       subTitle: 'view list of Reports',
                       icon: Icons.bar_chart_rounded,
-                      onTab: () {},
-                    ),
-                    DashboardCard(
-                      title: 'Update Location',
-                      iconColor: Colors.green,
-                      subTitle: 'update lat-long',
-                      icon: Icons.location_on_outlined,
                       onTab: () {},
                     ),
                   ],

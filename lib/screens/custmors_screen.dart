@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iba/data/models/custmor_model.dart';
+import 'package:iba/data/riverpod/cart_item_notifier_provider.dart';
 import 'package:iba/data/riverpod/custmors/custmors_notifier_provider.dart';
 import 'package:iba/data/riverpod/custmors/custmors_state.dart';
 import 'package:iba/helper/constants.dart';
@@ -12,7 +14,10 @@ import 'package:velocity_x/velocity_x.dart';
 
 class CustmorsScreen extends ConsumerStatefulWidget {
   final int placeID;
-  const CustmorsScreen({Key? key, required this.placeID}) : super(key: key);
+  final bool isAddCart;
+  const CustmorsScreen(
+      {Key? key, required this.placeID, this.isAddCart = false})
+      : super(key: key);
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _CustmorsScreenState();
@@ -122,16 +127,21 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                           itemBuilder: (context, index) {
                             final customor = custmorsState.custmorsList![index];
                             return CustomerCards(
-                              name: customor.csName ?? '',
-                              location: customor.address ?? '',
-                              phone: customor.phoneNo ?? '',
-                              storeName: customor.csName ?? '',
+                              custmor: customor,
+                              isAddCart: widget.isAddCart,
                               onTab: () {
-                                Navigator.push(
-                                    context,
-                                    SlideRightRoute(
-                                        page: CustmorsProfile(
-                                            custmor: customor)));
+                                if (widget.isAddCart) {
+                                  ref
+                                      .read(cartCustomNotifierProvider.notifier)
+                                      .state = customor;
+                                  context.pop();
+                                } else {
+                                  Navigator.push(
+                                      context,
+                                      SlideRightRoute(
+                                          page: CustmorsProfile(
+                                              custmor: customor)));
+                                }
                               },
                             );
                           }),
@@ -163,20 +173,19 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
   }
 }
 
-class CustomerCards extends StatelessWidget {
-  final String name, storeName, location, phone;
+class CustomerCards extends ConsumerWidget {
+  final CustmorModel custmor;
   final void Function() onTab;
+  final bool isAddCart;
   const CustomerCards({
     Key? key,
-    required this.name,
-    required this.storeName,
-    required this.location,
-    required this.phone,
+    required this.custmor,
     required this.onTab,
+    this.isAddCart = false,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
@@ -201,9 +210,13 @@ class CustomerCards extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                name.text.black.bold.size(14).make(),
+                (custmor.csName ?? '').text.black.bold.size(14).make(),
                 5.heightBox,
-                storeName.text.color(AppColors.grey).size(10).make(),
+                (custmor.csName ?? '')
+                    .text
+                    .color(AppColors.grey)
+                    .size(10)
+                    .make(),
                 5.heightBox,
                 Row(
                   children: [
@@ -212,13 +225,24 @@ class CustomerCards extends StatelessWidget {
                       size: 20,
                     ),
                     2.widthBox,
-                    Expanded(child: location.text.gray600.size(10).make()),
+                    Expanded(
+                        child: (custmor.address ?? '')
+                            .text
+                            .gray600
+                            .size(10)
+                            .make()),
                   ],
                 ),
                 5.heightBox,
               ],
             ),
           ),
+          if (isAddCart)
+            Icon(
+              Icons.navigate_next_rounded,
+              size: 30,
+              color: AppColors.primaryColor,
+            ),
         ],
       ).pSymmetric(h: 20, v: 10),
     ).onTap(onTab);

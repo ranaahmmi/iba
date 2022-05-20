@@ -1,9 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iba/data/models/custmor_model.dart';
 import 'package:iba/data/models/item_model.dart';
 
 final cartItemNotifierProvider =
     StateNotifierProvider<CartItemNotifier, List<ItemModel>>((ref) {
   return CartItemNotifier();
+});
+final cartCustomNotifierProvider = StateProvider<CustmorModel?>((ref) {
+  return null;
 });
 
 class CartItemNotifier extends StateNotifier<List<ItemModel>> {
@@ -25,9 +29,7 @@ class CartItemNotifier extends StateNotifier<List<ItemModel>> {
   addQuantity(ItemModel item, int quantity) {
     int index = state.indexOf(item);
     state = state.toList()..removeAt(index);
-    item.itemQuantity=quantity;
+    item.itemQuantity = quantity;
     state = state.toList()..insert(index, item);
   }
-
- 
 }
