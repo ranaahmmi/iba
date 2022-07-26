@@ -28,9 +28,9 @@ class ItemNotifier extends StateNotifier<ItemState> {
 
   Future<bool> getItemLoadMore(int categoryID,String search) async {
     try {
-      final _items =
+      final items =
           await _itemRepository.fatchItem(categoryID,search, loadmore: true);
-      state = ItemLoadedState(_items);
+      state = ItemLoadedState(items);
       return true;
     } catch (e) {
       state = ItemErrorState(e.toString());

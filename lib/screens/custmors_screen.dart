@@ -125,22 +125,22 @@ class _CustmorsScreenState extends ConsumerState<CustmorsScreen> {
                           shrinkWrap: true,
                           itemCount: custmorsState.custmorsList!.length,
                           itemBuilder: (context, index) {
-                            final customor = custmorsState.custmorsList![index];
+                            final customer = custmorsState.custmorsList![index];
                             return CustomerCards(
-                              custmor: customor,
+                              custmor: customer,
                               isAddCart: widget.isAddCart,
                               onTab: () {
                                 if (widget.isAddCart) {
                                   ref
-                                      .read(cartCustomNotifierProvider.notifier)
-                                      .state = customor;
+                                      .read(cartItemNotifierProvider.notifier)
+                                      .addcustomer(customer);
                                   context.pop();
                                 } else {
                                   Navigator.push(
                                       context,
                                       SlideRightRoute(
                                           page: CustmorsProfile(
-                                              custmor: customor)));
+                                              custmor: customer)));
                                 }
                               },
                             );

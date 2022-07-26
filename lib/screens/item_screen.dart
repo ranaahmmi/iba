@@ -101,6 +101,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                               item: itemState.itemList![index],
                               buttonWidget: ref
                                       .watch(cartItemNotifierProvider)
+                                      .items
                                       .any((element) =>
                                           element.itemsPk ==
                                           itemState.itemList![index].itemsPk)

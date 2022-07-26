@@ -1,7 +1,8 @@
+import 'package:iba/data/interfaces/iitem_repository.dart';
 import 'package:iba/data/models/item_model.dart';
 import 'package:iba/data/network/network_utils.dart';
 
-class ItemRepository {
+class ItemRepository extends IitemRepository {
   int itemCategoryOffsets = 0;
   int itemOffsets = 0;
   int itemLimit = 30;
@@ -9,6 +10,7 @@ class ItemRepository {
   List<ItemCategoryModel> itemCategoryList = [];
   List<ItemModel> itemList = [];
 
+  @override
   Future<List<ItemCategoryModel>> fatchItemCategorys(String search,
       {bool loadmore = false}) async {
     if (loadmore) {
@@ -30,6 +32,7 @@ class ItemRepository {
     return itemCategoryList;
   }
 
+  @override
   Future<List<ItemModel>> fatchItem(int categoryID, String search,
       {bool loadmore = false}) async {
     if (loadmore) {

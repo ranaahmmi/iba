@@ -10,6 +10,7 @@ import 'package:iba/screens/item_categories_screen.dart';
 import 'package:iba/screens/side_drawer.dart';
 import 'package:iba/screens/target_report_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   final User user;
@@ -45,8 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       left: 0,
                       child: IconButton(
                         icon: const Icon(
-                          Icons.list_sharp,
-                          size: 30,
+                          Icons.sort,
+                          size: 34,
                           color: Colors.black,
                         ),
                         onPressed: () {
@@ -96,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 .py(10),
                           ],
                         ),
-                        ('Mar 22, 2022').text.white.size(10).sm.make().py(10),
+                        const Clock().pOnly(top: 10),
                       ],
                     ),
                     5.heightBox,
@@ -122,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           runAlignment: WrapAlignment.center,
                           alignment: WrapAlignment.center,
                           children: [
-                            DashboardCard(
+                            DashboardAnimationButton(
                               title: 'Customers',
                               subTitle: 'view list of Customers',
                               iconColor: AppColors.primaryColor,
@@ -136,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     )));
                               },
                             ),
-                            DashboardCard(
+                            DashboardAnimationButton(
                               title: 'Items',
                               subTitle: 'view list of Items',
                               iconColor: Colors.green,
@@ -148,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         page: const ItemCategoriesScreen()));
                               },
                             ),
-                            DashboardCard(
+                            DashboardAnimationButton(
                               title: 'Orders',
                               iconColor: Colors.orange,
                               subTitle: 'view list of Orders',
@@ -158,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     SlideRightRoute(page: const CartScreen()));
                               },
                             ),
-                            DashboardCard(
+                            DashboardAnimationButton(
                               title: 'Target Reports',
                               iconColor: Colors.orange[900]!,
                               subTitle: 'view list of Reports',
@@ -171,13 +172,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               },
                             ),
-                            DashboardCard(
-                              title: 'Daily Sales',
-                              iconColor: Colors.green,
-                              subTitle: 'view list of Reorts',
-                              icon: Icons.receipt_outlined,
-                              onTab: () {},
-                            ),
+                            // DashboardAnimationButton(
+                            //   title: 'Daily Sales',
+                            //   iconColor: Colors.green,
+                            //   subTitle: 'view list of Reorts',
+                            //   icon: Icons.receipt_outlined,
+                            //   onTab: () {},
+                            // ),
                           ],
                         ),
                       ),
@@ -275,40 +276,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class DashboardCard extends StatelessWidget {
-  final String title, subTitle;
-  final IconData icon;
-  final Function? onTab;
-  final Color iconColor;
-  const DashboardCard({
-    Key? key,
-    required this.title,
-    required this.subTitle,
-    required this.icon,
-    required this.iconColor,
-    this.onTab,
-  }) : super(key: key);
+class Clock extends StatelessWidget {
+  const Clock({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return DrawerButton(
-      width: 160,
-      height: 190,
-      onTap: onTab,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            size: 23,
-            color: iconColor,
-          ).p(10).box.roundedFull.color(AppColors.grey.withOpacity(0.2)).make(),
-          defaultpadding,
-          subTitle.text.color(AppColors.grey).size(10).make(),
-          5.heightBox,
-          title.text.black.bold.size(14).make(),
-        ],
-      ),
+    return StreamBuilder(
+      stream: Stream.periodic(const Duration(minutes: 1)),
+      builder: (context, snapshot) {
+        return Column(
+          children: [
+            DateFormat('dd-MM-yyyy')
+                .format(DateTime.now())
+                .text
+                .wide
+                .white
+                .make(),
+            DateFormat.jm().format(DateTime.now()).text.wide.white.make(),
+          ],
+        );
+      },
     );
   }
 }

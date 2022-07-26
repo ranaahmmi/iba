@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iba/helper/constants.dart';
 import 'package:iba/helper/style.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class AppCustomButton extends StatelessWidget {
   final VoidCallback? onpressed;
@@ -54,39 +56,47 @@ class AppCustomButton extends StatelessWidget {
   }
 }
 
-class DrawerButton extends StatefulWidget {
-  final Function? onTap;
-  final double? width;
-  final double? height;
+class DashboardAnimationButton extends StatefulWidget {
+  final VoidCallback onTab;
+  final double width;
+  final double height;
   final Color? color;
   final Color? focusColor;
   final Color? hoverColor;
   final Color? splashColor;
-  final Widget child;
   final bool? enableScaleAnimation;
+  final String title;
+  final String subTitle;
+  final IconData icon;
+  final Color iconColor;
 
-  const DrawerButton(
-      {Key? key,
-      this.onTap,
-      this.width,
-      this.height,
-      this.color,
-      this.focusColor,
-      this.hoverColor,
-      this.splashColor,
-      this.enableScaleAnimation,
-      required this.child})
-      : super(key: key);
+  const DashboardAnimationButton({
+    Key? key,
+    required this.title,
+    required this.subTitle,
+    required this.icon,
+    required this.iconColor,
+    required this.onTab,
+    this.width = 160,
+    this.height = 190,
+    this.color,
+    this.focusColor,
+    this.hoverColor,
+    this.splashColor,
+    this.enableScaleAnimation,
+  }) : super(key: key);
 
   @override
-  _DrawerButtonState createState() => _DrawerButtonState();
+  DashboardAnimationButtonState createState() =>
+      DashboardAnimationButtonState();
 }
 
-class _DrawerButtonState extends State<DrawerButton>
+class DashboardAnimationButtonState extends State<DashboardAnimationButton>
     with SingleTickerProviderStateMixin {
   double _scale = 1.0;
   AnimationController? _controller;
   Color color = Colors.white;
+  bool isdown = false;
 
   @override
   void initState() {
@@ -124,10 +134,12 @@ class _DrawerButtonState extends State<DrawerButton>
         onPointerDown: (details) {
           _controller?.forward();
           color = AppColors.primaryColor;
+          isdown = true;
         },
         onPointerUp: (details) {
           _controller?.reverse();
           color = Colors.white;
+          isdown = false;
         },
         child: Transform.scale(
           scale: _scale,
@@ -156,7 +168,33 @@ class _DrawerButtonState extends State<DrawerButton>
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 22),
-          child: widget.child,
-        )).onTap(widget.onTap);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                widget.icon,
+                size: 23,
+                color: widget.iconColor,
+              )
+                  .p(10)
+                  .box
+                  .roundedFull
+                  .color(
+                      isdown ? Colors.white : AppColors.grey.withOpacity(0.2))
+                  .make(),
+              defaultpadding,
+              widget.subTitle.text
+                  .color(isdown ? Colors.white : AppColors.grey)
+                  .size(10)
+                  .make(),
+              5.heightBox,
+              widget.title.text
+                  .color(isdown ? Colors.white : Colors.black)
+                  .bold
+                  .size(14)
+                  .make(),
+            ],
+          ),
+        )).onTap(widget.onTab);
   }
 }

@@ -97,7 +97,7 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  childAspectRatio: 0.92,
+                                  childAspectRatio: 0.90,
                                   mainAxisSpacing: 5,
                                   crossAxisSpacing: 1),
                           shrinkWrap: true,
@@ -175,7 +175,7 @@ class ItemCategoryCards extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
               fit: BoxFit.cover,
-            ).h(120),
+            ).h(110),
           ).p(10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -208,3 +208,4 @@ class ItemCategoryCards extends StatelessWidget {
     });
   }
 }
+

@@ -31,13 +31,13 @@ class ItemModel {
   final int? itemsPk;
   final String? itemName;
   final int? itemCategoryPk;
-   int itemQuantity;
+  int itemQuantity;
 
   ItemModel({
     this.itemsPk,
     this.itemName,
     this.itemCategoryPk,
-    this.itemQuantity = 0,
+    this.itemQuantity = 1,
   });
 
   ItemModel copyWith({
@@ -58,7 +58,7 @@ class ItemModel {
       : itemsPk = json['items_pk'] as int?,
         itemName = json['item_name'] as String?,
         itemCategoryPk = json['item_category_pk'] as int?,
-        itemQuantity = json['item_quantity'] ?? 0;
+        itemQuantity = json['item_quantity'] ?? 1;
 
   Map<String, dynamic> toJson() => {
         'items_pk': itemsPk,

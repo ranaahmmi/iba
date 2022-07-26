@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
-  bool rememberMe = false;
+  bool rememberMe = true;
   @override
   void dispose() {
     _emailController.dispose();
@@ -89,16 +89,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               isLoading = true;
                               setState(() {});
                               try {
-                                final User? user = await AuthRepository()
-                                    .signIn(_emailController.text,
-                                        _passwordController.text, rememberMe);
-
-                                Navigator.push(
+                                final User user = await AuthRepository().signIn(
+                                    _emailController.text,
+                                    _passwordController.text,
+                                    rememberMe);
+                                if (!mounted) return;
+                                Navigator.pushAndRemoveUntil(
                                   context,
                                   SlideRightRoute(
                                       page: HomeScreen(
-                                    user: user!,
+                                    user: user,
                                   )),
+                                  (Route<dynamic> route) => false,
                                 );
                               } catch (e) {
                                 showInDialog(context,

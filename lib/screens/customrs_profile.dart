@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iba/data/models/custmor_model.dart';
+import 'package:iba/helper/app_buttons.dart';
 import 'package:iba/helper/constants.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
-import 'package:iba/screens/home_screen.dart';
 import 'package:iba/screens/map.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -83,14 +83,14 @@ class CustmorsProfile extends StatelessWidget {
                   runAlignment: WrapAlignment.center,
                   alignment: WrapAlignment.center,
                   children: [
-                    DashboardCard(
+                    DashboardAnimationButton(
                       title: 'Orders',
                       iconColor: Colors.blue,
                       subTitle: 'place order for this custmor',
                       icon: Icons.shopping_cart_outlined,
                       onTab: () {},
                     ),
-                    DashboardCard(
+                    DashboardAnimationButton(
                       title: 'Update Location',
                       iconColor: Colors.green,
                       subTitle: 'update lat-long',
@@ -105,14 +105,14 @@ class CustmorsProfile extends StatelessWidget {
                             )));
                       },
                     ),
-                    DashboardCard(
+                    DashboardAnimationButton(
                       title: 'Invoice History',
                       subTitle: 'view history',
                       iconColor: Colors.orange,
                       icon: Icons.timer_sharp,
                       onTab: () {},
                     ),
-                    DashboardCard(
+                    DashboardAnimationButton(
                       title: 'Target Reports',
                       iconColor: Colors.orange[900]!,
                       subTitle: 'view list of Reports',

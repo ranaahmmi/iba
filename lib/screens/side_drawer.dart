@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:iba/data/models/user_model.dart';
 import 'package:iba/helper/constants.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/custmors_screen.dart';
+import 'package:iba/screens/splash_screen.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class SideDrawer extends StatelessWidget {
@@ -40,9 +44,52 @@ class SideDrawer extends StatelessWidget {
             ),
             42.heightBox,
             DrawerTile(
+              icon: Icons.dashboard,
+              text: 'Dashboard',
+              function: () {
+                context.pop();
+              },
+            ),
+            10.heightBox,
+            DrawerTile(
               icon: Icons.person,
-              text: 'My Profile',
+              text: 'Customer',
+              function: () {
+                Navigator.push(
+                  context,
+                  SlideRightRoute(
+                      page: CustmorsScreen(
+                    placeID: User.fromJson(
+                      getJSONAsync('user'),
+                    ).branchId!,
+                  )),
+                );
+              },
+            ),
+            10.heightBox,
+            DrawerTile(
+              icon: Icons.settings,
+              text: 'Settings',
               function: () {},
+            ),
+            10.heightBox,
+            DrawerTile(
+              icon: Icons.help,
+              text: 'help',
+              function: () {},
+            ),
+            10.heightBox,
+            DrawerTile(
+              icon: Icons.logout,
+              text: 'log out',
+              function: () async {
+                await setValue('islogin', false);
+                // ignore: use_build_context_synchronously
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    SlideRightRoute(page: const SplashScreen()),
+                    (route) => false);
+              },
             ),
           ],
         ),

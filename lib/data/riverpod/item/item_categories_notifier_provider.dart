@@ -1,5 +1,5 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iba/data/interfaces/iitem_repository.dart';
 import 'package:iba/data/models/item_model.dart';
 import 'package:iba/data/repository/item_repository.dart';
 
@@ -10,9 +10,8 @@ final itemCategoryNotifierProvider =
   return ItemCategoyNotifier(ref.watch(itemRepositoryProvider));
 });
 
-
 class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
-  final ItemRepository _itemCategoryRepository;
+  final IitemRepository _itemCategoryRepository;
 
   ItemCategoyNotifier(this._itemCategoryRepository)
       : super(const InitalItemCategoryState());
@@ -20,8 +19,8 @@ class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
   Future<bool> getItemCategory(String search) async {
     try {
       state = const ItemCategoryLoadingState();
-      final itemCategory =
-          await _itemCategoryRepository.fatchItemCategorys(search,loadmore: false);
+      final itemCategory = await _itemCategoryRepository
+          .fatchItemCategorys(search, loadmore: false);
       state = ItemCategoryLoadedState(itemCategory);
       return true;
     } catch (e) {
@@ -32,9 +31,9 @@ class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
 
   Future<bool> getItemCategoryLoadMore(String search) async {
     try {
-      final _itemCategory =
-          await _itemCategoryRepository.fatchItemCategorys(search, loadmore: true);
-      state = ItemCategoryLoadedState(_itemCategory);
+      final itemCategory = await _itemCategoryRepository
+          .fatchItemCategorys(search, loadmore: true);
+      state = ItemCategoryLoadedState(itemCategory);
       return true;
     } catch (e) {
       state = ItemCategoryErrorState(e.toString());
@@ -42,7 +41,6 @@ class ItemCategoyNotifier extends StateNotifier<ItemCategoryState> {
     }
   }
 }
-
 
 abstract class ItemCategoryState {
   const ItemCategoryState();
