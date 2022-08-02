@@ -1,10 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/interfaces/iorder_repository.dart';
 import 'package:iba/data/models/custmor_model.dart';
+import 'package:iba/data/models/invoice_model.dart';
 import 'package:iba/data/models/item_model.dart';
 import 'package:iba/data/models/order_place_model.dart';
 import 'package:iba/data/models/user_model.dart';
 import 'package:iba/data/repository/order_repository.dart';
+import 'package:iba/helper/page_navigation_animation.dart';
+import 'package:iba/screens/pdf_invoice.dart';
+import 'package:iba/screens/pdf_view.dart';
 
 final cartItemNotifierProvider =
     StateNotifierProvider<CartItemNotifier, CartItemState>((ref) {
@@ -51,15 +56,53 @@ class CartItemNotifier extends StateNotifier<CartItemState> {
     state = state.copyWith(items: state.items..insert(index, item));
   }
 
-  Future<OrderPlaceModel> orderPlace(User user) async {
+  orderPlace(User user, BuildContext context) async {
     state = state.copyWith(isLoading: true);
-    // final orderReturn = await _orderRepository.orderPlace(OrderPlaceModel(
-    //     agent: user, custmor: state.custmor!, items: state.items));
-    Future.delayed(const Duration(seconds: 3));
+    final orderReturn = await _orderRepository.orderPlace(OrderPlaceModel(
+        agent: user, custmor: state.custmor!, items: state.items));
+    // Future.delayed(const Duration(seconds: 3));
+    // final orderReturn = OrderPlaceModel(
+    //     agent: user, custmor: state.custmor!, items: state.items);
+
+    final date = DateTime.now();
+    final dueDate = date.add(const Duration(days: 7));
+    final invoice = Invoice(
+      supplier: Supplier(
+        name: orderReturn.agent.personName ?? 'not given',
+        address: orderReturn.agent.branchName ?? 'not given',
+        paymentInfo: 'PAY TO ${orderReturn.agent.personName}',
+      ),
+      customer: Customer(
+        name: orderReturn.custmor.csName ?? 'not given',
+        address: orderReturn.custmor.address ?? 'not given',
+      ),
+      info: InvoiceInfo(
+        date: DateTime.now(),
+        dueDate: dueDate,
+        description: 'My description...',
+        number: "INV-${orderReturn.orderHeadPk}",
+      ),
+      items: orderReturn.items.map((element) {
+        return InvoiceItem(
+          description: element.itemName ?? 'not given',
+          date: DateTime.now(),
+          quantity: element.itemQuantity,
+          vat: 0.00,
+          unitPrice: 0.00,
+        );
+      }).toList(),
+    );
+
+    await PdfInvoiceApi.generate(invoice)
+        .then((value) => Navigator.pushAndRemoveUntil(
+            context,
+            SlideRightRoute(
+                page: PDFScreen(
+              path: value.path,
+            )),
+            (Route<dynamic> route) => route.isFirst));
+
     state = state.copyWith(isLoading: false);
-    // return orderReturn;
-    return OrderPlaceModel(
-        agent: user, custmor: state.custmor!, items: state.items);
   }
 }
 

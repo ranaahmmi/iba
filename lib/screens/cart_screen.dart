@@ -1,9 +1,7 @@
-import 'package:awesome_dialog/awesome_dialog.dart' as awesome;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/item_model.dart';
-import 'package:iba/data/models/order_place_model.dart';
 import 'package:iba/data/models/user_model.dart';
 import 'package:iba/data/network/api.dart';
 import 'package:iba/data/riverpod/cart_item_notifier_provider.dart';
@@ -11,10 +9,8 @@ import 'package:iba/helper/app_buttons.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
 import 'package:iba/screens/custmors_screen.dart';
-import 'package:iba/data/models/invoice_model.dart';
+import 'package:iba/screens/home_screen.dart';
 import 'package:iba/screens/item_categories_screen.dart';
-import 'package:iba/screens/pdf_invoice.dart';
-import 'package:iba/screens/pdf_view.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -52,17 +48,6 @@ class CartScreen extends ConsumerWidget {
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                      const Positioned(
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Text('Take Order',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
-                        ),
-                      ),
                       Positioned(
                         top: 0,
                         bottom: 0,
@@ -86,6 +71,65 @@ class CartScreen extends ConsumerWidget {
                 ? cartEmpty(context, cartstate.items)
                 : Column(
                     children: <Widget>[
+                      'Order Detials'
+                          .text
+                          .bold
+                          .color(AppColors.primaryColor)
+                          .size(20)
+                          .make(),
+                      if (cartstate.custmor != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20, right: 20, top: 15, bottom: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CartTileList(
+                                    icon: Icons.person,
+                                    title: cartstate.custmor?.csName ??
+                                        'not given',
+                                  ),
+                                  10.heightBox,
+                                  CartTileList(
+                                    icon: Icons.location_on,
+                                    title: cartstate.custmor?.address ??
+                                        'not given',
+                                  ),
+                                ],
+                              ),
+                              IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                  ),
+                                  color: Colors.red,
+                                  onPressed: () {
+                                    ref
+                                        .read(cartItemNotifierProvider.notifier)
+                                        .removeCustomer();
+                                  }),
+                            ],
+                          ),
+                        )
+                      else
+                        IconButton(
+                          icon: const Icon(Icons.person_add),
+                          color: AppColors.primaryColor,
+                          iconSize: 26,
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                SlideRightRoute(
+                                    page: CustmorsScreen(
+                                        isAddCart: true,
+                                        placeID: user.branchId!)));
+                          },
+                        ).p(20),
+                      10.heightBox,
                       Expanded(
                         child: ListView.builder(
                           shrinkWrap: true,
@@ -98,69 +142,6 @@ class CartScreen extends ConsumerWidget {
                           },
                         ),
                       ),
-                      cartstate.custmor == null
-                          ? AppCustomButton(
-                              title: 'Add Customer',
-                              isBoldtitle: true,
-                              onpressed: () {
-                                Navigator.push(
-                                    context,
-                                    SlideRightRoute(
-                                        page: CustmorsScreen(
-                                            isAddCart: true,
-                                            placeID: user.branchId!)));
-                              },
-                            ).p(20)
-                          : Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 20, right: 20, top: 5, bottom: 5),
-                              child: Column(
-                                children: [
-                                  CartTileList(
-                                    title: 'Custmor:',
-                                    subTitle: cartstate.custmor?.csName ??
-                                        'not given',
-                                  ),
-                                  10.heightBox,
-                                  CartTileList(
-                                    title: 'Adress:',
-                                    subTitle: cartstate.custmor?.address ??
-                                        'not given',
-                                  ),
-                                  10.heightBox,
-                                  Row(children: <Widget>[
-                                    Text("remove custmor:",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .subtitle2!
-                                            .copyWith(
-                                                fontWeight: FontWeight.w500)),
-                                    const Spacer(),
-                                    IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          ref
-                                              .read(cartItemNotifierProvider
-                                                  .notifier)
-                                              .removeCustomer();
-                                        }),
-                                  ]),
-                                ],
-                              ),
-                            ),
-                      const Divider(
-                        thickness: 1,
-                        indent: 20,
-                        endIndent: 20,
-                      ),
-                      10.heightBox,
-                      CartTileList(
-                        title: 'Agent:',
-                        subTitle: user.personName!,
-                      ).pSymmetric(h: 20, v: 5),
                       const Divider(
                         thickness: 1,
                         indent: 20,
@@ -195,95 +176,30 @@ class CartScreen extends ConsumerWidget {
                           isBoldtitle: true,
                           onpressed: () {
                             if (cartstate.custmor == null) {
-                              awesome.AwesomeDialog(
+                              showCustomDialogBottomAnimation(
                                 context: context,
-                                animType: awesome.AnimType.SCALE,
-                                dialogType: awesome.DialogType.ERROR,
-                                desc: 'Please add customer',
-                                btnCancelOnPress: () {},
-                                title: 'Error',
-                              ).show();
+                                title: 'Please add customer',
+                                onCancel: () {},
+                                isShowCancleButton: false,
+                                confirmButtonText: 'Cancel',
+                                onConfirm: () => Navigator.pop(context),
+                              );
                             } else {
-                              awesome.AwesomeDialog(
+                              showCustomDialogBottomAnimation(
                                 context: context,
-                                animType: awesome.AnimType.SCALE,
-                                dialogType: awesome.DialogType.QUESTION,
-                                body: const Center(
-                                  child: Text(
-                                    'Are you sure you want to Place Order?',
-                                    style:
-                                        TextStyle(fontStyle: FontStyle.italic),
-                                  ),
-                                ),
-                                title: 'Confirmation',
-                                desc: 'Are you sure you want to Place Order?',
-                                btnOkColor: AppColors.primaryColor,
-                                btnOkOnPress: () async {
-                                  final OrderPlaceModel orderData = await ref
+                                title: 'Are you sure you want to Place Order?',
+                                onConfirm: () async {
+                                  Navigator.pop(context);
+                                  await ref
                                       .read(cartItemNotifierProvider.notifier)
-                                      .orderPlace(user);
-                                  // print(
-                                  //     "branchId: ${orderData.agent.branchId}");
-                                  // print(
-                                  //     'Custmor: ${orderData.custmor.cusSupPk}');
-                                  // print('Remarks: ${orderData.items.length}');
-                                  // for (var item in orderData.items) {
-                                  //   print('Item ID: ${item.itemsPk}');
-                                  //   print('Item name: ${item.itemName}');
-                                  //   print('Quantity: ${item.itemQuantity}');
-                                  // }
+                                      .orderPlace(user, context);
+
                                   ref
                                       .read(cartItemNotifierProvider.notifier)
                                       .clearCart();
-                                  final date = DateTime.now();
-                                  final dueDate =
-                                      date.add(const Duration(days: 7));
-                                  final invoice = Invoice(
-                                    supplier: Supplier(
-                                      name: orderData.agent.personName ??
-                                          'not given',
-                                      address: orderData.agent.branchName ??
-                                          'not given',
-                                      paymentInfo:
-                                          'PAY TO ${orderData.agent.personName}',
-                                    ),
-                                    customer: Customer(
-                                      name: orderData.custmor.csName ??
-                                          'not given',
-                                      address: orderData.custmor.address ??
-                                          'not given',
-                                    ),
-                                    info: InvoiceInfo(
-                                      date: DateTime.now(),
-                                      dueDate: dueDate,
-                                      description: 'My description...',
-                                      number: "INV-${orderData.orderHeadPk}",
-                                    ),
-                                    items: orderData.items.map((element) {
-                                      return InvoiceItem(
-                                        description:
-                                            element.itemName ?? 'not given',
-                                        date: DateTime.now(),
-                                        quantity: element.itemQuantity,
-                                        vat: 0.00,
-                                        unitPrice: 0.00,
-                                      );
-                                    }).toList(),
-                                  );
-
-                                  final pdfFile =
-                                      await PdfInvoiceApi.generate(invoice);
-                                  // ignore: use_build_context_synchronously
-                                  Navigator.pushAndRemoveUntil(
-                                      context,
-                                      SlideRightRoute(
-                                          page: PDFScreen(
-                                        path: pdfFile.path,
-                                      )),
-                                      (Route<dynamic> route) => route.isFirst);
                                 },
-                                btnCancelOnPress: () {},
-                              ).show();
+                                onCancel: () => Navigator.pop(context),
+                              );
                             }
                           }).p(20),
                     ],
@@ -386,26 +302,27 @@ class CartScreen extends ConsumerWidget {
 }
 
 class CartTileList extends StatelessWidget {
-  final String title, subTitle;
+  final String title;
+  final IconData icon;
   const CartTileList({
     Key? key,
     required this.title,
-    required this.subTitle,
+    required this.icon,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: <Widget>[
-        Text(title,
-            style: Theme.of(context)
-                .textTheme
-                .subtitle2!
-                .copyWith(fontWeight: FontWeight.w500)),
-        10.widthBox,
-        Expanded(child: subTitle.text.overflow(TextOverflow.ellipsis).make())
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          color: AppColors.primaryColor,
+        ),
+        8.widthBox,
+        title.text.size(10).black.make(),
       ],
-    );
+    ).pOnly(left: 20);
   }
 }
 

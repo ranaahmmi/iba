@@ -195,84 +195,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<bool> _onBackPressed(BuildContext context) async {
-    return await showCustomDialogBottomAnimation(context: context);
-  }
-
-  showCustomDialogBottomAnimation({required BuildContext context}) {
-    return showGeneralDialog(
-      barrierLabel: "Barrier",
-      barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: const Duration(milliseconds: 700),
-      context: context,
-      pageBuilder: (_, __, ___) {
-        return Material(
-          color: Colors.transparent,
-          child: Align(
-              alignment: Alignment.center,
-              child: Center(
-                child: Container(
-                  height: 150,
-                  width: context.screenWidth * 0.8,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      10.heightBox,
-                      const Spacer(),
-                      'Do you really want to exit'
-                          .text
-                          .fontWeight(FontWeight.w500)
-                          .size(18)
-                          .black
-                          .make(),
-                      const Spacer(
-                        flex: 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          AppCustomButton(
-                              width: 100,
-                              height: 40,
-                              shadowColor: AppColors.primaryColor,
-                              elevation: 4,
-                              title: 'Yes',
-                              onpressed: () => Navigator.pop(context, true)),
-                          20.widthBox,
-                          AppCustomButton(
-                              width: 100,
-                              height: 40,
-                              shadowColor: AppColors.primaryColor,
-                              elevation: 4,
-                              title: 'No',
-                              onpressed: () {
-                                Navigator.pop(context, false);
-                              }),
-                        ],
-                      ),
-                      const Spacer(
-                        flex: 1,
-                      ),
-                    ],
-                  ).p(10),
-                ),
-              )),
-        );
-      },
-      transitionBuilder: (context, anim, __, child) {
-        return SlideTransition(
-          position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0))
-              .animate(CurvedAnimation(
-            parent: anim,
-            curve: Curves.easeInOutCirc,
-          )),
-          child: child,
-        );
-      },
-    );
+    return await showCustomDialogBottomAnimation(
+        context: context,
+        title: 'Do you really want to exit',
+        onConfirm: () => Navigator.pop(context, true),
+        onCancel: () => Navigator.pop(context, false));
   }
 }
 
@@ -298,4 +225,91 @@ class Clock extends StatelessWidget {
       },
     );
   }
+}
+
+showCustomDialogBottomAnimation(
+    {required BuildContext context,
+    required String title,
+    bool isShowCancleButton = true,
+    double height = 150,
+    String confirmButtonText = 'Yes',
+    String cancelButtonText = 'No',
+    required VoidCallback onCancel,
+    required VoidCallback onConfirm}) {
+  return showGeneralDialog(
+    barrierLabel: "Barrier",
+    barrierDismissible: true,
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionDuration: const Duration(milliseconds: 700),
+    context: context,
+    pageBuilder: (BuildContext context, __, ___) {
+      return Material(
+        color: Colors.transparent,
+        child: Align(
+            alignment: Alignment.center,
+            child: Center(
+              child: Container(
+                height: height,
+                width: context.screenWidth * 0.8,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    10.heightBox,
+                    const Spacer(),
+                    title.text
+                        .fontWeight(FontWeight.w500)
+                        .size(18)
+                        .black
+                        .make(),
+                    const Spacer(
+                      flex: 2,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AppCustomButton(
+                            width: 100,
+                            height: 40,
+                            shadowColor: AppColors.primaryColor,
+                            elevation: 4,
+                            title: confirmButtonText,
+                            onpressed: onConfirm),
+                        if (isShowCancleButton)
+                          Row(
+                            children: [
+                              20.widthBox,
+                              AppCustomButton(
+                                  width: 100,
+                                  height: 40,
+                                  shadowColor: AppColors.primaryColor,
+                                  elevation: 4,
+                                  title: cancelButtonText,
+                                  onpressed: onCancel),
+                            ],
+                          ),
+                      ],
+                    ),
+                    const Spacer(
+                      flex: 1,
+                    ),
+                  ],
+                ).p(10),
+              ),
+            )),
+      );
+    },
+    transitionBuilder: (context, anim, __, child) {
+      return SlideTransition(
+        position: Tween(begin: const Offset(0, 1), end: const Offset(0, 0))
+            .animate(CurvedAnimation(
+          parent: anim,
+          curve: Curves.easeInOutCirc,
+        )),
+        child: child,
+      );
+    },
+  );
 }

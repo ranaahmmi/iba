@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "328831402799",
+    "project_id": "ibd-project-4c84e",
+    "storage_bucket": "ibd-project-4c84e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:328831402799:android:62635dddce5d6e13d657da",
+        "android_client_info": {
+          "package_name": "com.ahmmitech.iba"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "328831402799-8dtarb60cols50vg6dt48bro1qilhsev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjRXvF9JsKPRfIEEvD-fI6eG0CabiWSuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "328831402799-8dtarb60cols50vg6dt48bro1qilhsev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

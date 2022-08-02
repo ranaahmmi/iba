@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iba/data/models/custmor_model.dart';
+import 'package:iba/data/riverpod/cart_item_notifier_provider.dart';
 import 'package:iba/helper/app_buttons.dart';
 import 'package:iba/helper/constants.dart';
 import 'package:iba/helper/page_navigation_animation.dart';
 import 'package:iba/helper/style.dart';
+import 'package:iba/screens/cart_screen.dart';
+import 'package:iba/screens/home_screen.dart';
 import 'package:iba/screens/map.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-class CustmorsProfile extends StatelessWidget {
+class CustmorsProfile extends ConsumerWidget {
   final CustmorModel custmor;
   const CustmorsProfile({Key? key, required this.custmor}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
@@ -88,7 +92,15 @@ class CustmorsProfile extends StatelessWidget {
                       iconColor: Colors.blue,
                       subTitle: 'place order for this custmor',
                       icon: Icons.shopping_cart_outlined,
-                      onTab: () {},
+                      onTab: () {
+                        ref
+                            .read(cartItemNotifierProvider.notifier)
+                            .addcustomer(custmor);
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            SlideRightRoute(page: const CartScreen()),
+                            (route) => route.isFirst);
+                      },
                     ),
                     DashboardAnimationButton(
                       title: 'Update Location',
@@ -110,14 +122,32 @@ class CustmorsProfile extends StatelessWidget {
                       subTitle: 'view history',
                       iconColor: Colors.orange,
                       icon: Icons.timer_sharp,
-                      onTab: () {},
+                      onTab: () {
+                        showCustomDialogBottomAnimation(
+                          context: context,
+                          title: 'No Invoice History',
+                          isShowCancleButton: false,
+                          confirmButtonText: "Cancel",
+                          onConfirm: () => Navigator.pop(context),
+                          onCancel: () => Navigator.pop(context),
+                        );
+                      },
                     ),
                     DashboardAnimationButton(
-                      title: 'Target Reports',
+                      title: 'Previous Orders',
                       iconColor: Colors.orange[900]!,
                       subTitle: 'view list of Reports',
                       icon: Icons.bar_chart_rounded,
-                      onTab: () {},
+                      onTab: () {
+                        showCustomDialogBottomAnimation(
+                          context: context,
+                          title: 'No Previous Orders',
+                          confirmButtonText: "Cancel",
+                          isShowCancleButton: false,
+                          onConfirm: () => Navigator.pop(context),
+                          onCancel: () => Navigator.pop(context),
+                        );
+                      },
                     ),
                   ],
                 ),

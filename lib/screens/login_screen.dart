@@ -103,26 +103,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   (Route<dynamic> route) => false,
                                 );
                               } catch (e) {
-                                showInDialog(context,
-                                    builder: (context) => Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(e.toString(),
-                                                style: const TextStyle(
-                                                    color: Colors.red,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 20)),
-                                            defaultpadding,
-                                            AppCustomButton(
-                                              title: 'Ok',
-                                              onpressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                    dialogAnimation:
-                                        DialogAnimation.SLIDE_BOTTOM_TOP);
+                                showCustomDialogBottomAnimation(
+                                  context: context,
+                                  title: e.toString(),
+                                  isShowCancleButton: false,
+                                  confirmButtonText: "Cancel",
+                                  onConfirm: () => Navigator.pop(context),
+                                  onCancel: () => Navigator.pop(context),
+                                );
                               }
                               isLoading = false;
                               setState(() {});
