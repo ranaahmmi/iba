@@ -260,8 +260,8 @@ class CartScreen extends ConsumerWidget {
   }
 
   noCartImage(BuildContext context) {
-    return SvgPicture.network(
-      'https://smartkit.wrteam.in/smartkit/grobag/emptycart.svg',
+    return Image.asset(
+      'assets/images/empty_cart.png',
       height: MediaQuery.of(context).size.height * 0.2,
     );
   }

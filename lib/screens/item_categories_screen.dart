@@ -97,7 +97,7 @@ class _ItemCategoriesScreenState extends ConsumerState<ItemCategoriesScreen> {
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
-                                  childAspectRatio: 0.90,
+                                  childAspectRatio: 0.88,
                                   mainAxisSpacing: 5,
                                   crossAxisSpacing: 1),
                           shrinkWrap: true,
@@ -161,26 +161,28 @@ class ItemCategoryCards extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: CachedNetworkImage(
-              imageUrl:
-                  "https://www.foodnavigator-asia.com/var/wrbm_gb_food_pharma/storage/images/_aliases/news_large/3/1/0/1/171013-1-eng-GB/1.-Moutai.jpg",
-              progressIndicatorBuilder: (context, url, downloadProgress) =>
-                  Center(
-                      child: CircularProgressIndicator(
-                          value: downloadProgress.progress)),
-              errorWidget: (context, url, error) => Image.asset(
-                "assets/images/product-img.jpg",
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl:
+                    "https://www.foodnavigator-asia.com/var/wrbm_gb_food_pharma/storage/images/_aliases/news_large/3/1/0/1/171013-1-eng-GB/1.-Moutai.jpg",
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    Center(
+                        child: CircularProgressIndicator(
+                            value: downloadProgress.progress)),
+                errorWidget: (context, url, error) => Image.asset(
+                  "assets/images/product-img.jpg",
+                  fit: BoxFit.cover,
+                ),
                 fit: BoxFit.cover,
               ),
-              fit: BoxFit.cover,
-            ).h(110),
-          ).p(10),
+            ).p(10),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              Flexible(
                 child: '${itemCategory.distributionName}'
                     .text
                     .bold
@@ -208,4 +210,3 @@ class ItemCategoryCards extends StatelessWidget {
     });
   }
 }
-

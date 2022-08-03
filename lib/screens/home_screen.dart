@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       defaultpadding,
                     ],
-                  ).px(25),
+                  ).px(20),
                 ),
               )
             ],

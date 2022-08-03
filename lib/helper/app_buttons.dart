@@ -77,7 +77,7 @@ class DashboardAnimationButton extends StatefulWidget {
     required this.icon,
     required this.iconColor,
     required this.onTab,
-    this.width = 160,
+    this.width = 156,
     this.height = 190,
     this.color,
     this.focusColor,
